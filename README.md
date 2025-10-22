@@ -52,6 +52,8 @@ npx prisma migrate dev --name init
 ```powershell
 # Worker
 node src/workers/reservationWorker.js
+# Email worker (processes outbound confirmation emails)
+node src/workers/emailWorker.js
 
 # Server
 npm run dev
