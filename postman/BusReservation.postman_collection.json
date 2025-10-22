@@ -1,0 +1,91 @@
+{
+  "info": {
+    "name": "Bus Reservation API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_postman_id": "bus-reservation-collection"
+  },
+  "item": [
+    {
+      "name": "Auth - Login",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"admin@example.com\",\n  \"password\": \"Pass1234\"\n}"
+        },
+        "url": { "raw": "{{baseUrl}}/auth/login", "host": ["{{baseUrl}}"], "path": ["auth","login"] }
+      },
+      "response": [],
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "const data = pm.response.json();",
+              "if (data.accessToken) pm.environment.set('accessToken', data.accessToken);",
+              "if (data.refreshToken) pm.environment.set('refreshToken', data.refreshToken);",
+              "pm.test('Login returned tokens', () => pm.expect(data).to.have.property('accessToken'));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Auth - Refresh",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": { "mode": "raw", "raw": "{\n  \"refreshToken\": \"{{refreshToken}}\"\n}" },
+        "url": { "raw": "{{baseUrl}}/auth/refresh", "host": ["{{baseUrl}}"], "path": ["auth","refresh"] }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": { "exec": ["const data = pm.response.json(); if (data.accessToken) pm.environment.set('accessToken', data.accessToken);"] }
+        }
+      ]
+    },
+    {
+      "name": "Auth - Logout",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": { "mode": "raw", "raw": "{\n  \"refreshToken\": \"{{refreshToken}}\"\n}" },
+        "url": { "raw": "{{baseUrl}}/auth/logout", "host": ["{{baseUrl}}"], "path": ["auth","logout"] }
+      }
+    },
+    {
+      "name": "Reservations - Create (queue)",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" },
+          { "key": "Authorization", "value": "Bearer {{accessToken}}" }
+        ],
+        "body": { "mode": "raw", "raw": "{\n  \"tripId\": 2,\n  \"seat\": 9\n}" },
+        "url": { "raw": "{{baseUrl}}/reservations", "host": ["{{baseUrl}}"], "path": ["reservations"] }
+      }
+    },
+    {
+      "name": "Reservations - Create (dev)",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" },
+          { "key": "Authorization", "value": "Bearer {{accessToken}}" }
+        ],
+        "body": { "mode": "raw", "raw": "{\n  \"tripId\": 2,\n  \"seat\": 5\n}" },
+        "url": { "raw": "{{baseUrl}}/dev/create-reservation", "host": ["{{baseUrl}}"], "path": ["dev","create-reservation"] }
+      }
+    },
+    {
+      "name": "Reservations - List",
+      "request": {
+        "method": "GET",
+        "header": [ { "key": "Authorization", "value": "Bearer {{accessToken}}" } ],
+        "url": { "raw": "{{baseUrl}}/reservations", "host": ["{{baseUrl}}"], "path": ["reservations"] }
+      }
+    }
+  ]
+}
