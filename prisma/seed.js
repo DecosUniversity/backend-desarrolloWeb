@@ -8,7 +8,14 @@ async function main() {
   const admin = await prisma.user.upsert({
     where: { email: 'admin@example.com' },
     update: {},
-    create: { email: 'admin@example.com', password: '$2b$10$CpNqjzKZ8x3s6Z5gQ1N8eO1qzQm6u5/3X6rE1K1tqfQ6Ykz1aY9Zm', name: 'Admin' } // password: Pass1234
+    create: { email: 'admin@example.com', password: '$2b$10$CpNqjzKZ8x3s6Z5gQ1N8eO1qzQm6u5/3X6rE1K1tqfQ6Ykz1aY9Zm', name: 'Admin', role: 'ADMIN' } // password: Pass1234
+  });
+
+  // create sample traveler user
+  const traveler = await prisma.user.upsert({
+    where: { email: 'traveler@example.com' },
+    update: {},
+    create: { email: 'traveler@example.com', password: '$2b$10$CpNqjzKZ8x3s6Z5gQ1N8eO1qzQm6u5/3X6rE1K1tqfQ6Ykz1aY9Zm', name: 'Traveler', role: 'TRAVELER' }
   });
 
   // create buses

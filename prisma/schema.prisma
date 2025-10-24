@@ -12,9 +12,15 @@ model User {
   email       String          @unique
   password    String
   name        String?
+  role        UserRole        @default(TRAVELER)
   createdAt   DateTime        @default(now())
   refreshTokens RefreshToken[]
   reservations Reservation[]
+}
+
+enum UserRole {
+  ADMIN
+  TRAVELER
 }
 
 model RefreshToken {

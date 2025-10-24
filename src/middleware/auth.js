@@ -9,7 +9,7 @@ module.exports = async function (req, res, next) {
     const payload = jwt.verify(token, process.env.JWT_ACCESS_SECRET);
     const user = await prisma.user.findUnique({ where: { id: payload.sub } });
     if (!user) return res.status(401).json({ error: 'user not found' });
-    req.user = { id: user.id, email: user.email };
+  req.user = { id: user.id, email: user.email, role: user.role || payload.role };
     next();
   } catch (err) {
     return res.status(401).json({ error: 'invalid token' });

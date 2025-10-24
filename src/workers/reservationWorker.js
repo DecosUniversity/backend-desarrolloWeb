@@ -19,11 +19,26 @@ const worker = new Worker('reservations', async job => {
     // enqueue email confirmation
     try {
       const user = await prisma.user.findUnique({ where: { id: userId } });
-      const trip = await prisma.trip.findUnique({ where: { id: tripId } });
+      // include bus so we can show plate/number
+      const trip = await prisma.trip.findUnique({ where: { id: tripId }, include: { bus: true } });
       const { addEmailToQueue } = require('../queues/emailQueue');
+      const formatDate = require('../utils/formatDate')
+
+      const busInfo = trip.bus ? `${trip.bus.plate}` : `${trip.busId}`;
+      const departAt = trip.departAt ? formatDate(trip.departAt) : '-';
+      const price = trip.price != null ? `${trip.price}` : '-';
+
       const subject = `Reserva confirmada - viaje ${trip.origin} -> ${trip.destination}`;
-      const text = `Hola ${user.name || user.email},\n\nTu reserva (ID: ${reservation.id}) para el viaje ${trip.origin} -> ${trip.destination} en el asiento ${seat} ha sido confirmada.\n\nGracias.`;
-      const html = `<p>Hola ${user.name || user.email},</p><p>Tu reserva (ID: ${reservation.id}) para el viaje <strong>${trip.origin} -> ${trip.destination}</strong> en el asiento <strong>${seat}</strong> ha sido confirmada.</p><p>Gracias.</p>`;
+      const text = `Hola ${user.name || user.email},\n\nTu reserva (ID: ${reservation.id}) para el viaje ${trip.origin} -> ${trip.destination} ha sido confirmada.\n\nDetalles:\n- Bus: ${busInfo}\n- Fecha y hora de salida: ${departAt}\n- Asiento: ${seat}\n- Precio: ${price}\n\nGracias.`;
+      const html = `<p>Hola ${user.name || user.email},</p>
+        <p>Tu reserva (ID: <strong>${reservation.id}</strong>) para el viaje <strong>${trip.origin} → ${trip.destination}</strong> ha sido confirmada.</p>
+        <ul>
+          <li><strong>Bus:</strong> ${busInfo}</li>
+          <li><strong>Fecha y hora de salida:</strong> ${departAt}</li>
+          <li><strong>Asiento:</strong> ${seat}</li>
+          <li><strong>Precio:</strong> ${price}</li>
+        </ul>
+        <p>Gracias.</p>`;
       await addEmailToQueue({ to: user.email, subject, text, html });
     } catch (e) {
       console.error('Failed to enqueue confirmation email', e.message);
